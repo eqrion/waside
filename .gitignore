@@ -2,4 +2,3 @@
 target
 tests/spec
 tests/wasm-corpus
-crates/waside-component/src/bindings.rs
