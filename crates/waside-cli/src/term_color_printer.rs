@@ -6,7 +6,9 @@ fn color_spec(style: Style) -> ColorSpec {
     let mut spec = ColorSpec::new();
     match style {
         Style::Keyword => {
-            spec.set_bold(true).set_fg(Some(Color::Blue)).set_intense(true);
+            spec.set_bold(true)
+                .set_fg(Some(Color::Blue))
+                .set_intense(true);
         }
         Style::Type => {
             spec.set_fg(Some(Color::Green)).set_intense(true);
@@ -64,7 +66,9 @@ impl Printer for TermColorPrinter {
             }
             self.at_line_start = false;
         }
-        self.buffer.set_color(&color_spec(self.current_style())).unwrap();
+        self.buffer
+            .set_color(&color_spec(self.current_style()))
+            .unwrap();
         write!(self.buffer, "{s}").unwrap();
         self.buffer.reset().unwrap();
     }

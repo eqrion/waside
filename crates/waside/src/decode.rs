@@ -6,11 +6,11 @@ use crate::ast::exports::{Export, ExternalKind};
 use crate::ast::functions::{Func, FuncBody, FuncBodyDef};
 use crate::ast::globals::Global;
 use crate::ast::imports::{Import, ImportType, TagKind, TagType};
-use crate::ast::tags::Tag;
 use crate::ast::instructions::Instruction;
 use crate::ast::memories::Memory;
 use crate::ast::module::Module;
 use crate::ast::tables::Table;
+use crate::ast::tags::Tag;
 use crate::ast::types::{
     ArrayType, CompositeInnerType, CompositeType, ContType, FieldType, FuncType, RecGroup,
     StorageType, StructType, SubType,
@@ -149,9 +149,8 @@ impl Module {
     pub fn decode_function(&mut self, idx: usize, bytes: &[u8]) -> Result<&FuncBodyDef> {
         if let FuncBody::Lazy { offset, len } = self.bodies[idx] {
             let body_bytes = &bytes[offset..offset + len];
-            let reader = wasmparser::FunctionBody::new(wasmparser::BinaryReader::new(
-                body_bytes, offset,
-            ));
+            let reader =
+                wasmparser::FunctionBody::new(wasmparser::BinaryReader::new(body_bytes, offset));
             let def = decode_function_body(reader)?;
             self.bodies[idx] = FuncBody::Decoded(def);
         }

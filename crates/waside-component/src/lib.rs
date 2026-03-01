@@ -83,7 +83,8 @@ impl Printer for RichWriter {
     }
 
     fn newline(&mut self, offset: Option<usize>) {
-        self.parts.push(PrintPart::NewLine(offset.unwrap_or(0) as u32));
+        self.parts
+            .push(PrintPart::NewLine(offset.unwrap_or(0) as u32));
         self.at_line_start = true;
     }
 
@@ -208,7 +209,13 @@ fn to_item_id(id: &DefinitionId) -> (waside::ItemId, u32) {
         DefinitionId::Element(i) => (waside::ItemId::Element(*i), *i),
         DefinitionId::Data(i) => (waside::ItemId::Data(*i), *i),
         DefinitionId::Tag(i) => (waside::ItemId::Tag(*i), *i),
-        DefinitionId::Local(l) => (waside::ItemId::Local { func: l.func, local: l.local }, l.func),
+        DefinitionId::Local(l) => (
+            waside::ItemId::Local {
+                func: l.func,
+                local: l.local,
+            },
+            l.func,
+        ),
     }
 }
 
@@ -233,9 +240,10 @@ fn to_definition_id(id: &waside::ItemId) -> DefinitionId {
         waside::ItemId::Global(i) => DefinitionId::Global(*i),
         waside::ItemId::Element(i) => DefinitionId::Element(*i),
         waside::ItemId::Data(i) => DefinitionId::Data(*i),
-        waside::ItemId::Local { func, local } => {
-            DefinitionId::Local(LocalId { func: *func, local: *local })
-        }
+        waside::ItemId::Local { func, local } => DefinitionId::Local(LocalId {
+            func: *func,
+            local: *local,
+        }),
         waside::ItemId::Tag(i) => DefinitionId::Tag(*i),
     }
 }

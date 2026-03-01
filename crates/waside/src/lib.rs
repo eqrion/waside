@@ -19,19 +19,19 @@ pub use ast::exports::{Export, ExternalKind};
 pub use ast::functions::{Func, FuncBody, FuncBodyDef};
 pub use ast::globals::Global;
 pub use ast::imports::{Import, ImportType, TagKind, TagType};
-pub use ast::tags::Tag;
 pub use ast::instructions::{BrTableData, Instruction};
 pub use ast::memories::Memory;
 pub use ast::module::Module;
+pub use ast::module::{Item, ItemId};
 pub use ast::names::NameSection;
 pub use ast::tables::Table;
+pub use ast::tags::Tag;
 pub use ast::types::{
     ArrayType, CompositeInnerType, CompositeType, ContType, FieldType, FuncType, RecGroup,
     StorageType, StructType, SubType,
 };
 pub use decode::DecodeOptions;
 pub use error::{Error, Result};
-pub use ast::module::{Item, ItemId};
 pub use print::PrintContext;
 pub use printer::{PlainTextPrinter, Printer, Style};
 pub use span::Span;

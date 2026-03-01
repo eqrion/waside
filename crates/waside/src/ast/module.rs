@@ -44,12 +44,12 @@ use crate::ast::exports::Export;
 use crate::ast::functions::{Func, FuncBody};
 use crate::ast::globals::Global;
 use crate::ast::imports::{Import, ImportType};
-use crate::ast::tags::Tag;
-use crate::Span;
 use crate::ast::memories::Memory;
 use crate::ast::names::NameSection;
 use crate::ast::tables::Table;
+use crate::ast::tags::Tag;
 use crate::ast::types::RecGroup;
+use crate::Span;
 
 /// A decoded WebAssembly module.
 #[derive(Debug, Clone, Eq)]
@@ -134,7 +134,6 @@ impl Module {
         }
     }
 }
-
 
 impl Module {
     /// Find the closest enclosing AST item for `id`.

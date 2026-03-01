@@ -5,11 +5,11 @@ use crate::ast::exports::ExternalKind;
 use crate::ast::functions::{Func, FuncBody, FuncBodyDef};
 use crate::ast::globals::Global;
 use crate::ast::imports::ImportType;
-use crate::ast::tags::Tag;
 use crate::ast::instructions::Instruction;
 use crate::ast::memories::Memory;
 use crate::ast::module::{Item, ItemId, Module};
 use crate::ast::tables::Table;
+use crate::ast::tags::Tag;
 use crate::ast::types::{CompositeInnerType, SubType};
 use crate::printer::{Printer, Style};
 
@@ -497,99 +497,99 @@ fn print_types(ctx: &PrintContext, p: &mut dyn Printer) {
 impl Item for SubType {
     fn print(&self, ctx: &PrintContext, p: &mut dyn Printer, idx: u32) {
         let sub = self;
-    p.write_str("(");
-    write_keyword(p, "type");
-    print_name_and_index(p, ctx.type_name(idx), idx);
-    p.write_str(" ");
-
-    // Sub type wrapper if non-final or has supertype
-    let needs_sub = !sub.is_final || sub.supertype_idx.is_some();
-    if needs_sub {
         p.write_str("(");
-        write_keyword(p, "sub");
+        write_keyword(p, "type");
+        print_name_and_index(p, ctx.type_name(idx), idx);
         p.write_str(" ");
-        if sub.is_final {
-            write_keyword(p, "final");
-            p.write_str(" ");
-        }
-        if let Some(sup) = sub.supertype_idx {
-            print_type_idx(ctx, p, sup);
-            p.write_str(" ");
-        }
-    }
 
-    let shared = sub.composite_type.shared;
-    if shared {
-        p.write_str("(");
-        write_keyword(p, "shared");
-        p.write_str(" ");
-    }
-
-    match &sub.composite_type.inner {
-        CompositeInnerType::Func(f) => {
+        // Sub type wrapper if non-final or has supertype
+        let needs_sub = !sub.is_final || sub.supertype_idx.is_some();
+        if needs_sub {
             p.write_str("(");
-            write_keyword(p, "func");
-            if !f.params.is_empty() {
-                p.write_str(" (");
-                write_keyword(p, "param");
-                for param in &f.params {
-                    p.write_str(" ");
-                    print_val_type_ctx(Some(ctx), p, *param);
-                }
-                p.write_str(")");
-            }
-            if !f.results.is_empty() {
-                p.write_str(" (");
-                write_keyword(p, "result");
-                for result in &f.results {
-                    p.write_str(" ");
-                    print_val_type_ctx(Some(ctx), p, *result);
-                }
-                p.write_str(")");
-            }
-            p.write_str(")");
-        }
-        CompositeInnerType::Array(a) => {
-            p.write_str("(");
-            write_keyword(p, "array");
+            write_keyword(p, "sub");
             p.write_str(" ");
-            print_field_type_ctx(ctx, p, &a.field_type);
-            p.write_str(")");
-        }
-        CompositeInnerType::Struct(s) => {
-            p.write_str("(");
-            write_keyword(p, "struct");
-            let field_names = ctx.module.names.field_names.get(&idx);
-            for (fi, field) in s.fields.iter().enumerate() {
-                p.write_str(" (");
-                write_keyword(p, "field");
-                if let Some(name) = field_names.and_then(|m| m.get(&(fi as u32))) {
-                    p.write_str(" ");
-                    write_name(p, name);
-                }
+            if sub.is_final {
+                write_keyword(p, "final");
                 p.write_str(" ");
-                print_field_type_ctx(ctx, p, field);
+            }
+            if let Some(sup) = sub.supertype_idx {
+                print_type_idx(ctx, p, sup);
+                p.write_str(" ");
+            }
+        }
+
+        let shared = sub.composite_type.shared;
+        if shared {
+            p.write_str("(");
+            write_keyword(p, "shared");
+            p.write_str(" ");
+        }
+
+        match &sub.composite_type.inner {
+            CompositeInnerType::Func(f) => {
+                p.write_str("(");
+                write_keyword(p, "func");
+                if !f.params.is_empty() {
+                    p.write_str(" (");
+                    write_keyword(p, "param");
+                    for param in &f.params {
+                        p.write_str(" ");
+                        print_val_type_ctx(Some(ctx), p, *param);
+                    }
+                    p.write_str(")");
+                }
+                if !f.results.is_empty() {
+                    p.write_str(" (");
+                    write_keyword(p, "result");
+                    for result in &f.results {
+                        p.write_str(" ");
+                        print_val_type_ctx(Some(ctx), p, *result);
+                    }
+                    p.write_str(")");
+                }
                 p.write_str(")");
             }
-            p.write_str(")");
+            CompositeInnerType::Array(a) => {
+                p.write_str("(");
+                write_keyword(p, "array");
+                p.write_str(" ");
+                print_field_type_ctx(ctx, p, &a.field_type);
+                p.write_str(")");
+            }
+            CompositeInnerType::Struct(s) => {
+                p.write_str("(");
+                write_keyword(p, "struct");
+                let field_names = ctx.module.names.field_names.get(&idx);
+                for (fi, field) in s.fields.iter().enumerate() {
+                    p.write_str(" (");
+                    write_keyword(p, "field");
+                    if let Some(name) = field_names.and_then(|m| m.get(&(fi as u32))) {
+                        p.write_str(" ");
+                        write_name(p, name);
+                    }
+                    p.write_str(" ");
+                    print_field_type_ctx(ctx, p, field);
+                    p.write_str(")");
+                }
+                p.write_str(")");
+            }
+            CompositeInnerType::Cont(c) => {
+                p.write_str("(");
+                write_keyword(p, "cont");
+                p.write_str(" ");
+                print_type_idx(ctx, p, c.type_index);
+                p.write_str(")");
+            }
         }
-        CompositeInnerType::Cont(c) => {
-            p.write_str("(");
-            write_keyword(p, "cont");
-            p.write_str(" ");
-            print_type_idx(ctx, p, c.type_index);
-            p.write_str(")");
-        }
-    }
 
-    if shared {
+        if shared {
+            p.write_str(")");
+        }
+        if needs_sub {
+            p.write_str(")");
+        }
         p.write_str(")");
-    }
-    if needs_sub {
-        p.write_str(")");
-    }
-    p.write_str(")");
-    p.newline(None);
+        p.newline(None);
     }
 }
 
@@ -928,53 +928,53 @@ fn print_exports(ctx: &PrintContext, p: &mut dyn Printer) {
 impl Item for Element {
     fn print(&self, ctx: &PrintContext, p: &mut dyn Printer, idx: u32) {
         let elem = self;
-    p.write_str("(");
-    write_keyword(p, "elem");
-    print_name_and_index(p, ctx.elem_name(idx), idx);
+        p.write_str("(");
+        write_keyword(p, "elem");
+        print_name_and_index(p, ctx.elem_name(idx), idx);
 
-    match &elem.kind {
-        ElementKind::Active {
-            table_index,
-            offset_expr,
-        } => {
-            if let Some(table_idx) = table_index {
-                p.write_str(" (");
-                write_keyword(p, "table");
+        match &elem.kind {
+            ElementKind::Active {
+                table_index,
+                offset_expr,
+            } => {
+                if let Some(table_idx) = table_index {
+                    p.write_str(" (");
+                    write_keyword(p, "table");
+                    p.write_str(" ");
+                    print_table_idx(ctx, p, *table_idx);
+                    p.write_str(")");
+                }
                 p.write_str(" ");
-                print_table_idx(ctx, p, *table_idx);
-                p.write_str(")");
+                print_const_expr_offset(ctx, p, offset_expr);
             }
-            p.write_str(" ");
-            print_const_expr_offset(ctx, p, offset_expr);
-        }
-        ElementKind::Passive => {}
-        ElementKind::Declared => {
-            p.write_str(" ");
-            write_keyword(p, "declare");
-        }
-    }
-
-    match &elem.items {
-        ElementItems::Functions(funcs) => {
-            p.write_str(" ");
-            write_keyword(p, "func");
-            for func_idx in funcs {
+            ElementKind::Passive => {}
+            ElementKind::Declared => {
                 p.write_str(" ");
-                print_func_idx(ctx, p, *func_idx);
+                write_keyword(p, "declare");
             }
         }
-        ElementItems::Expressions(ref_type, exprs) => {
-            p.write_str(" ");
-            print_ref_type_ctx(Some(ctx), p, *ref_type);
-            for expr in exprs {
+
+        match &elem.items {
+            ElementItems::Functions(funcs) => {
                 p.write_str(" ");
-                print_const_expr_item(ctx, p, expr);
+                write_keyword(p, "func");
+                for func_idx in funcs {
+                    p.write_str(" ");
+                    print_func_idx(ctx, p, *func_idx);
+                }
+            }
+            ElementItems::Expressions(ref_type, exprs) => {
+                p.write_str(" ");
+                print_ref_type_ctx(Some(ctx), p, *ref_type);
+                for expr in exprs {
+                    p.write_str(" ");
+                    print_const_expr_item(ctx, p, expr);
+                }
             }
         }
-    }
 
-    p.write_str(")");
-    p.newline(Some(self.span.offset));
+        p.write_str(")");
+        p.newline(Some(self.span.offset));
     }
 }
 
@@ -1166,7 +1166,14 @@ fn print_function_body(ctx: &PrintContext, p: &mut dyn Printer, def: &FuncBodyDe
                 break;
             }
         }
-        print_instruction(ctx, p, instr, func_idx, &mut label_indices, &mut label_count);
+        print_instruction(
+            ctx,
+            p,
+            instr,
+            func_idx,
+            &mut label_indices,
+            &mut label_count,
+        );
         p.newline(Some(span.offset));
     }
 }
@@ -1928,7 +1935,6 @@ fn print_instruction(
         // Everything else: simple ops with no args
         _ => {}
     }
-
 }
 
 fn print_block_label_and_type(
@@ -2002,7 +2008,10 @@ fn print_local_idx(ctx: &PrintContext, p: &mut dyn Printer, func_idx: u32, local
         .get(&func_idx)
         .and_then(|m| m.get(&local_idx))
         .map(|s| s.as_str());
-    p.begin_xref(ItemId::Local { func: func_idx, local: local_idx });
+    p.begin_xref(ItemId::Local {
+        func: func_idx,
+        local: local_idx,
+    });
     print_idx(p, name, local_idx);
     p.end_xref();
 }
@@ -2289,4 +2298,3 @@ fn instruction_wat_name(instr: &Instruction) -> std::borrow::Cow<'static, str> {
         _ => visit_name_to_wat(instruction_name(instr)).into(),
     }
 }
-
