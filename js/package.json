@@ -14,7 +14,7 @@
   "keywords": [],
   "author": "",
   "license": "(Apache-2.0 WITH LLVM-exception) OR Apache-2.0 OR MIT",
-  "description": "",
+  "description": "An AST for WebAssembly that supports decoding, encoding, and printing.",
   "scripts": {
     "build": "npm run build-component && npm run transpile",
     "build-component": "cd ../crates/waside-component && cargo component build --release --target wasm32-wasip1",

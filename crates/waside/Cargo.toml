@@ -2,6 +2,11 @@
 name = "waside"
 version = "0.1.0"
 edition = "2021"
+license = "(Apache-2.0 WITH LLVM-exception) OR Apache-2.0 OR MIT"
+description = "An AST for WebAssembly that supports decoding, encoding, and printing."
+repository = "https://github.com/eqrion/waside"
+keywords = ["webassembly", "wasm", "ast", "encoder"]
+categories = ["wasm"]
 
 [dependencies]
 wasmparser = { workspace = true }
