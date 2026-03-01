@@ -15,3 +15,12 @@ let wat = waside::print_module(&module);
 // Roundtrip: encode back to binary
 let encoded = module.encode()?;
 ```
+
+## License
+
+This project is licensed under multiple licenses:
+- Apache License 2.0
+- Apache License 2.0 with LLVM Exception
+- MIT License
+
+See the respective LICENSE files for details.
