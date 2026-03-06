@@ -1,6 +1,8 @@
 **/.DS_Store
+.claude/
 target
 tests/spec
 tests/wasm-corpus
 js/node_modules
 js/dist
+TODO.md
