@@ -133,12 +133,7 @@ struct Module {
 }
 
 impl GuestModule for Module {
-    fn new(init: Vec<u8>) -> Self {
-        let bytes = if let Ok(std::borrow::Cow::Owned(b)) = wat::parse_bytes(&init) {
-            b
-        } else {
-            init
-        };
+    fn new(bytes: Vec<u8>) -> Self {
         let decoded = WasmModule::decode(&bytes);
         Module { bytes, decoded }
     }

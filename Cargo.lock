@@ -332,7 +332,6 @@ name = "waside-component"
 version = "0.0.0"
 dependencies = [
  "waside",
- "wat",
  "wit-bindgen-rt",
 ]
 

@@ -18,7 +18,7 @@
   "scripts": {
     "build": "npm run build-component && npm run transpile",
     "build-component": "cd ../crates/waside-component && cargo component build --release --target wasm32-wasip1",
-    "transpile": "jco transpile --no-nodejs-compat ../target/wasm32-wasip1/release/waside_component.wasm --out-dir dist",
+    "transpile": "jco transpile --no-nodejs-compat -O -m --valid-lifting-optimization ../target/wasm32-wasip1/release/waside_component.wasm --out-dir dist",
     "clean": "rm -rf ../crates/waside-component/src/bindings.rs dist && echo '## you will need to run `cargo clean` separately to delete cargo artifacts'"
   },
   "devDependencies": {
