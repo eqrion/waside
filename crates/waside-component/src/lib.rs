@@ -4,7 +4,8 @@ mod bindings;
 use bindings::exports::local::module::module::{
     DefinitionId, Guest, GuestModule, Item, LocalId, PrintPart, Range, ValidateError,
 };
-use waside::{ItemId, Module as WasmModule, PrintContext, Printer, Style};
+use std::cell::RefCell;
+use waside::{DecodeOptions, ItemId, Module as WasmModule, PrintContext, Printer, Style};
 
 struct Component;
 
@@ -129,12 +130,14 @@ impl Guest for Component {
 
 struct Module {
     bytes: Vec<u8>,
-    decoded: Result<WasmModule, waside::Error>,
+    decoded: Result<RefCell<WasmModule>, waside::Error>,
 }
+
+const DECODE_OPTIONS: DecodeOptions = DecodeOptions { skeleton: true };
 
 impl GuestModule for Module {
     fn new(bytes: Vec<u8>) -> Self {
-        let decoded = WasmModule::decode(&bytes);
+        let decoded = WasmModule::decode_with_options(&bytes, &DECODE_OPTIONS).map(RefCell::new);
         Module { bytes, decoded }
     }
 
@@ -159,7 +162,7 @@ impl GuestModule for Module {
             indent_level: 0,
             at_line_start: true,
         };
-        print_definition(module, id.as_ref(), &mut writer);
+        print_definition(&mut module.borrow_mut(), &self.bytes, id.as_ref(), &mut writer);
         Ok(writer.parts)
     }
 
@@ -170,7 +173,7 @@ impl GuestModule for Module {
             indent_level: 0,
             at_line_start: true,
         };
-        print_definition(module, id.as_ref(), &mut writer);
+        print_definition(&mut module.borrow_mut(), &self.bytes, id.as_ref(), &mut writer);
         Ok(writer.result)
     }
 
@@ -180,7 +183,7 @@ impl GuestModule for Module {
 
     fn items(&self) -> Vec<Item> {
         match &self.decoded {
-            Ok(module) => gather_items(&self.bytes, module),
+            Ok(module) => gather_items(&self.bytes, &module.borrow()),
             Err(_) => vec![Item {
                 range: Range {
                     start: 0,
@@ -214,12 +217,18 @@ fn to_item_id(id: &DefinitionId) -> (waside::ItemId, u32) {
     }
 }
 
-fn print_definition(module: &WasmModule, id: Option<&DefinitionId>, p: &mut dyn Printer) {
+fn print_definition(
+    module: &mut WasmModule,
+    bytes: &[u8],
+    id: Option<&DefinitionId>,
+    p: &mut dyn Printer,
+) {
     let Some(def_id) = id else {
         module.print_to(p);
         return;
     };
     let (item_id, idx) = to_item_id(def_id);
+    let _ = module.decode_item(&item_id, bytes);
     if let Some(item) = module.find_closest_item(&item_id) {
         let ctx = PrintContext::new(module);
         item.print(&ctx, p, idx);

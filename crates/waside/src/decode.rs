@@ -8,7 +8,7 @@ use crate::ast::globals::Global;
 use crate::ast::imports::{Import, ImportType, TagKind, TagType};
 use crate::ast::instructions::Instruction;
 use crate::ast::memories::Memory;
-use crate::ast::module::Module;
+use crate::ast::module::{ItemId, Module};
 use crate::ast::tables::Table;
 use crate::ast::tags::Tag;
 use crate::ast::types::{
@@ -141,6 +141,35 @@ impl Module {
         }
 
         Ok(module)
+    }
+
+    /// Decode the item identified by `id`, if it has lazy content that needs decoding.
+    /// For function items, this decodes the function body. For other items, this is a
+    /// no-op. `bytes` must be the original module binary that was passed to `decode`.
+    pub fn decode_item(&mut self, id: &ItemId, bytes: &[u8]) -> Result<()> {
+        match id {
+            ItemId::Func(i) => {
+                let num_imported = self.num_imported_funcs();
+                if *i >= num_imported {
+                    self.decode_function((*i - num_imported) as usize, bytes)?;
+                }
+            }
+            ItemId::Local { func, .. } => {
+                let num_imported = self.num_imported_funcs();
+                if *func >= num_imported {
+                    self.decode_function((*func - num_imported) as usize, bytes)?;
+                }
+            }
+            _ => {}
+        }
+        Ok(())
+    }
+
+    fn num_imported_funcs(&self) -> u32 {
+        self.imports
+            .iter()
+            .filter(|imp| matches!(imp.ty, ImportType::Func(_)))
+            .count() as u32
     }
 
     /// Decode a single function body, storing the result back into the module. For lazy
